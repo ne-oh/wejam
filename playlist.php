@@ -13,8 +13,13 @@ $_SESSION["finished_connection_ids"] = array();*/
 
 $playlist_id = $_REQUEST["id"];
 
-if($_REQUEST["delete_sent"] == "true"){
-    array_push($_SESSION["finished_songs"], $_SESSION["songs"][$_REQUEST["position"]]);
+function moveElement(&$array, $from, $to) {
+    $out = array_splice($array, $from, 1);
+    array_splice($array, $to, 0, $out);
+}
+
+if($_REQUEST["controls"] == "delete"){
+    array_push($_SESSION["finished_songs"],$_SESSION["songs"][$_REQUEST["position"]] );
     array_push($_SESSION["finished_song_names"], $_SESSION["song_names"][$_REQUEST["position"]]);
     array_push($_SESSION["finished_users"], $_SESSION["users"][$_REQUEST["position"]]);
     array_push($_SESSION["finished_connection_ids"], $_SESSION["connection_ids"][$_REQUEST["position"]]);
@@ -23,30 +28,19 @@ if($_REQUEST["delete_sent"] == "true"){
     array_splice($_SESSION["song_names"], $_REQUEST["position"], 1);
     array_splice($_SESSION["users"], $_REQUEST["position"], 1);
     array_splice($_SESSION["connection_ids"], $_REQUEST["position"], 1);
-    //header("Location: playlist.php?id=" . $_REQUEST["id"]);
-
-}
-if($_REQUEST["load_sent"] == "true"){
-//1. splice array at position to the beginning
-    $load_save = array(
-            "songs" => $_SESSION["songs"][$_REQUEST["position"]],
-            "song_names" => $_SESSION["song_names"][$_REQUEST["position"]],
-            "users" => $_SESSION["users"][$_REQUEST["position"]],
-            "connection_ids" => $_SESSION["connection_ids"][$_REQUEST["position"]]
-    );
-    array_splice($_SESSION["songs"], $_REQUEST["position"], 1);
-    array_splice($_SESSION["song_names"], $_REQUEST["position"], 1);
-    array_splice($_SESSION["users"], $_REQUEST["position"], 1);
-    array_splice($_SESSION["connection_ids"], $_REQUEST["position"], 1);
-
-    array_unshift($_SESSION["songs"], $load_save[0][0]);
-    array_unshift($_SESSION["song_names"], $load_save[0][1]);
-    array_unshift($_SESSION["users"], $load_save[0][2]);
-    array_unshift($_SESSION["connection_ids"], $load_save[0][3]);
 
     header("Location: playlist.php?id=" . $_REQUEST["id"]);
 }
-if($_REQUEST["requeue_sent"] == "true"){
+if($_REQUEST["controls"] == "load"){
+//save the information of the song you're trying to load
+    moveElement($_SESSION["songs"], $_REQUEST["position"], 0);
+    moveElement($_SESSION["song_names"], $_REQUEST["position"], 0);
+    moveElement($_SESSION["users"], $_REQUEST["position"], 0);
+    moveElement($_SESSION["connection_ids"], $_REQUEST["position"], 0);
+
+    header("Location: playlist.php?id=" . $_REQUEST["id"]);
+}
+if($_REQUEST["controls"] == "requeue"){
     array_push($_SESSION["songs"], $_SESSION["finished_songs"][$_REQUEST["position"]]);
     array_push($_SESSION["users"], $_SESSION["finished_users"][$_REQUEST["position"]]);
     array_push($_SESSION["song_names"], $_SESSION["finished_song_names"][$_REQUEST["position"]]);
@@ -272,7 +266,7 @@ if(!$visit_results){
 }
 $current_playlist = $visit_results -> fetch_assoc();
 $incremented_visits = $current_playlist["visits"] + 1;
-$visit_increment_sql = "UPDATE playlists SET visits = " . $incremented_visits;
+$visit_increment_sql = "UPDATE playlists SET visits = " . $incremented_visits . "WHERE playlist_id = " . $_REQUEST["id"];
 $visits_update = $mysql -> query($visit_increment_sql);
 
 if($mysql->connect_errno) {
@@ -297,7 +291,7 @@ if(!$results){
     array_shift($_SESSION["users"]);
     array_shift($_SESSION["connection_ids"]);
 }*/
-if($_REQUEST["reset"] == "true" || sizeOf($_SESSION["songs"]) == 0 || $_SESSION["current_playlist"] != $playlist_id){
+if($_REQUEST["controls"] == "reset" || sizeOf($_SESSION["songs"]) == 0 || $_SESSION["current_playlist"] != $playlist_id){
     // should only happen when:
     // 1. the playlist is reset $_SESSION["create_new"] == "yes"
     // 2. a SESSION's first time on the playlist ( == 0 )
@@ -323,14 +317,11 @@ if($_REQUEST["reset"] == "true" || sizeOf($_SESSION["songs"]) == 0 || $_SESSION[
         $creator_id = $currentrow["creator_id"];
         $playlist_title = $currentrow["playlist_title"];
     }
-
-    header("Location: playlist.php?id=" . $_REQUEST["id"]);
 }else{
     while($currentrow = $results -> fetch_assoc()) {
         $creator_id = $currentrow["creator_id"];
         $playlist_title = $currentrow["playlist_title"];
     }
-    header("Location: playlist.php?id=" . $_REQUEST["id"]);
 
 }
 
@@ -449,7 +440,7 @@ include "header.php";
                         <h2>Disney Songs</h2>
                         <form action="playlist.php">
                             <input type="hidden" name="id" value="<?php echo $_REQUEST["id"];?>">
-                            <input type="hidden" name="reset" value="true">
+                            <input type="hidden" name="controls" value="reset">
                             <input type="submit" id="resetBtn" value="Reset Playlist">
                         </form>
                     <div id="modal-columns">
@@ -469,7 +460,7 @@ include "header.php";
                                         <strong><?php echo $_SESSION["users"][$y]?></strong>
                                         <form name="load" action="playlist.php">
                                             <input type="hidden" name="id" value="<?php echo $_REQUEST["id"];?>">
-                                            <input type="hidden" name="load_sent" value="true">
+                                            <input type="hidden" name="controls" value="delete">
                                             <input type="hidden" name="position" value="<?php echo $y;?>">
                                             <input class="queue-load" type="submit" value="Load">
                                         </form>
@@ -479,7 +470,7 @@ include "header.php";
                                         ?>
                                         <form name="delete" action="playlist.php">
                                             <input type="hidden" name="id" value="<?php echo $_REQUEST["id"];?>">
-                                            <input type="hidden" name="delete_sent" value="true">
+                                            <input type="hidden" name="controls" value="delete">
                                             <input type="hidden" name="position" value="<?php echo $y;?>">
                                             <input class="queue-delete" type="submit" value="Delete">
                                         </form>
@@ -493,7 +484,7 @@ include "header.php";
                         </div>
                         <div class="modal-row">
                             <h3 class="modal-row-header">Song Graveyard</h3>
-                            <p>Completed and Finished Songs</p>
+                            <p>Deleted and Finished Songs</p>
                             <ul id="listed-queue">
                                 <?php
                                 //var_dump($_SESSION["finished_song_names"]);
@@ -508,7 +499,7 @@ include "header.php";
                                         <strong><?php echo $_SESSION["finished_users"][$y]?></strong>
                                         <form name="requeue" action="playlist.php">
                                             <input type="hidden" name="id" value="<?php echo $_REQUEST["id"];?>">
-                                            <input type="hidden" name="requeue_sent" value="true">
+                                            <input type="hidden" name="controls" value="requeue">
                                             <input type="hidden" name="position" value="<?php echo $y;?>">
                                             <input class="queue-load" type="submit" value="Re-add">
                                         </form>
@@ -642,7 +633,7 @@ include "header.php";
                 // if the video in the player is finished,
                 <?php
 
-                    if(empty($REQUEST["load_sent"]) && empty($REQUEST["delete_sent"]) && empty($REQUEST["requeue_sent"])){
+                    if(empty($REQUEST["controls"])){
                         // 1. add to 'finished' set of arrays
                         array_push($_SESSION["finished_songs"], $_SESSION["songs"][0]);
                         array_push($_SESSION["finished_song_names"], $_SESSION["song_names"][0]);
@@ -662,25 +653,7 @@ include "header.php";
 
             }
         }
-        /*function changeBorderColor(playerStatus) {
-            var color;
-            if (playerStatus === -1) {
-                color = "#37474F"; // unstarted = gray
-            } else if (playerStatus === 0) {
-                color = "#FFFF00"; // ended = yellow
-            } else if (playerStatus === 1) {
-                color = "#33691E"; // playing = green
-            } else if (playerStatus === 2) {
-                color = "#DD2C00"; // paused = red
-            } else if (playerStatus === 3) {
-                color = "#AA00FF"; // buffering = purple
-            } else if (playerStatus === 5) {
-                color = "#FF6DOO"; // video cued = orange
-            }
-            if (color) {
-                document.getElementById('video-player').style.borderColor = color;
-            }
-        } */
+
         function onPlayerStateChange(event) {
             nextSong(event.data);
         }
