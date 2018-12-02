@@ -1,12 +1,73 @@
 <?php
 session_start();
 
-$_SESSION["queue"] = array();
+/*$_SESSION["songs"] = array();
+$_SESSION["song_names"] = array();
+$_SESSION["users"] = array();
+$_SESSION["connection_ids"] = array();
 
-include "header.php";
+$_SESSION["finished_songs"] = array();
+$_SESSION["finished_song_names"] = array();
+$_SESSION["finished_users"] = array();
+$_SESSION["finished_connection_ids"] = array();*/
+
+$playlist_id = $_REQUEST["id"];
+
+if($_REQUEST["delete_sent"] == "true"){
+    array_push($_SESSION["finished_songs"], $_SESSION["songs"][$_REQUEST["position"]]);
+    array_push($_SESSION["finished_song_names"], $_SESSION["song_names"][$_REQUEST["position"]]);
+    array_push($_SESSION["finished_users"], $_SESSION["users"][$_REQUEST["position"]]);
+    array_push($_SESSION["finished_connection_ids"], $_SESSION["connection_ids"][$_REQUEST["position"]]);
+
+    array_splice($_SESSION["songs"], $_REQUEST["position"], 1);
+    array_splice($_SESSION["song_names"], $_REQUEST["position"], 1);
+    array_splice($_SESSION["users"], $_REQUEST["position"], 1);
+    array_splice($_SESSION["connection_ids"], $_REQUEST["position"], 1);
+
+    //header("Location: playlist.php?id=" . $_REQUEST["id"]);
+
+}
+if($_REQUEST["load_sent"] == "true"){
+//1. splice array at position to the beginning
+    $load_save = array(
+            "songs" => $_SESSION["songs"][$_REQUEST["position"]],
+            "song_names" => $_SESSION["song_names"][$_REQUEST["position"]],
+            "users" => $_SESSION["users"][$_REQUEST["position"]],
+            "connection_ids" => $_SESSION["connection_ids"][$_REQUEST["position"]]
+    );
+    array_splice($_SESSION["songs"], $_REQUEST["position"], 1);
+    array_splice($_SESSION["song_names"], $_REQUEST["position"], 1);
+    array_splice($_SESSION["users"], $_REQUEST["position"], 1);
+    array_splice($_SESSION["connection_ids"], $_REQUEST["position"], 1);
+
+    array_unshift($_SESSION["songs"], $load_save[0][0]);
+    array_unshift($_SESSION["song_names"], $load_save[0][1]);
+    array_unshift($_SESSION["users"], $load_save[0][2]);
+    array_unshift($_SESSION["connection_ids"], $load_save[0][3]);
+
+    header("Location: playlist.php?id=" . $_REQUEST["id"]);
+}
+if($_REQUEST["requeue_sent"] == "true"){
+    array_push($_SESSION["songs"], $_SESSION["finished_songs"][$_REQUEST["position"]]);
+    array_push($_SESSION["users"], $_SESSION["finished_users"][$_REQUEST["position"]]);
+    array_push($_SESSION["song_names"], $_SESSION["finished_song_names"][$_REQUEST["position"]]);
+    array_push($_SESSION["connection_ids"], $_SESSION["finished_connection_ids"][$_REQUEST["position"]]);
+
+    header("Location: playlist.php?id=" . $_REQUEST["id"]);
+}
+
 ?>
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    var tag = document.createElement('script');
+    tag.id = 'iframe-demo';
+    tag.src = 'https://www.youtube.com/iframe_api';
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+
+</script>
 <style>
 
     .modal {
@@ -201,6 +262,20 @@ $mysql = new mysqli(
     $db
 );
 
+//VISITS SQL
+$visit_sql = "SELECT * FROM playlists WHERE playlist_id = " . $_REQUEST["id"];
+$visit_results = $mysql -> query($visit_sql);
+if(!$visit_results){
+    echo 'SQL error: ' . $mysql -> error;
+    echo $sql;
+}else{
+    //echo 'query successful';
+}
+$current_playlist = $visit_results -> fetch_assoc();
+$incremented_visits = $current_playlist["visits"] + 1;
+$visit_increment_sql = "UPDATE playlists SET visits = " . $incremented_visits;
+$visits_update = $mysql -> query($visit_increment_sql);
+
 if($mysql->connect_errno) {
     echo "db connection error : " . $mysql->connect_error;
     exit();
@@ -213,39 +288,56 @@ if(!$results){
 }else{
     //echo 'query successful';
 }
-//has to happen before declaration of variables
-if($_REQUEST["delete_sent"] == "true"){
-    $delete_sql = "DELETE FROM playlist_songs WHERE connection_id = " . $_REQUEST["connection_id"];
-    $deleted = $mysql -> query($delete_sql);
-    if(!$deleted){
-        echo 'SQL error in deleting song: ' . $mysql -> error;
 
-    }else{
-        //echo 'query successful';
+//has to happen before declaration of variables
+
+//if the first index is empty
+if($_SESSION["songs"][0] == ""){
+    array_shift($_SESSION["songs"]);
+    array_shift($_SESSION["song_names"]);
+    array_shift($_SESSION["users"]);
+    array_shift($_SESSION["connection_ids"]);
+}
+if($_REQUEST["reset"] == "true" || sizeOf($_SESSION["songs"]) == 0 || $_SESSION["current_playlist"] != $playlist_id){
+    // should only happen when:
+    // 1. the playlist is reset $_SESSION["create_new"] == "yes"
+    // 2. a SESSION's first time on the playlist ( == 0 )
+    // 3. The playlist is finished/no songs left and we need a song ( == 0 )
+    $_SESSION["songs"] = array();
+    $_SESSION["song_names"] = array();
+    $_SESSION["users"] = array();
+    $_SESSION["connection_ids"] = array();
+
+    $_SESSION["finished_songs"] = array();
+    $_SESSION["finished_song_names"] = array();
+    $_SESSION["finished_users"] = array();
+    $_SESSION["finished_connection_ids"] = array();
+
+    $_SESSION["current_playlist"] = $playlist_id;
+
+    while($currentrow = $results -> fetch_assoc()) {
+        array_push($_SESSION["songs"], $currentrow["youtube_id"]);
+        array_push($_SESSION["users"], $currentrow["username"]);
+        array_push($_SESSION["song_names"], $currentrow["title"]);
+        array_push($_SESSION["connection_ids"], $currentrow["connection_id"]);
+
+        $creator_id = $currentrow["creator_id"];
+        $playlist_title = $currentrow["playlist_title"];
+    }
+
+    header("Location: playlist.php?id=" . $_REQUEST["id"]);
+}else{
+    while($currentrow = $results -> fetch_assoc()) {
+        $creator_id = $currentrow["creator_id"];
+        $playlist_title = $currentrow["playlist_title"];
     }
 }
 
-$songs = array();
-$song_names = array();
-$users = array();
-$connection_ids = array();
-//also, session queue array
-
-$creator_id;
-$playlist_title;
-while($currentrow = $results -> fetch_assoc()) {
-    array_push($songs, $currentrow["youtube_id"]);
-    array_push($users, $currentrow["username"]);
-    array_push($song_names, $currentrow["title"]);
-    array_push($connection_ids, $currentrow["connection_id"]);
-    array_push($_SESSION["queue"], "false");
-
-    $creator_id = $currentrow["creator_id"];
-    $playlist_title = $currentrow["playlist_title"];
-}
-
+include "header.php";
 
 ?>
+
+<title><?php echo "🎶" . $playlist_title?></title>
 <div id="playlist-view">
 <div id="playlist-sidebar">
     <ul>
@@ -271,21 +363,21 @@ while($currentrow = $results -> fetch_assoc()) {
 
     <?php
     $x = 0;
-    $currentsong = $song_names[$x];
-    $currentuser = $users[$x];
+    $currentsong = $_SESSION["song_names"][$x];
+    $currentuser = $_SESSION["users"][$x];
     ?>
     <ul id="playing-now">
         <p class="song-label">NOW PLAYING</p>
-        <li class="queue-item"><strong><?php echo $song_names[$x]?> </strong> <br>added by <strong><?php echo $users[$x]?></strong> </li><hr class="current-song">
+        <li class="queue-item"><strong><?php echo $_SESSION["song_names"][$x]?> </strong> <br>added by <strong><?php echo $_SESSION["users"][$x]?></strong> </li><hr class="current-song">
     </ul>
     <ul id="playlist-song-queue">
         <p class="song-label" id="next-up">NEXT UP</p>
-        <li class="queue-item"><strong><?php echo $song_names[$x + 1]?></strong> <br>added by <strong><?php echo $users[$x + 1]?></strong> </li><hr class="song-hr">
+        <li class="queue-item"><strong><?php echo $_SESSION["song_names"][$x + 1]?></strong> <br>added by <strong><?php echo $_SESSION["users"][$x + 1]?></strong> </li><hr class="song-hr">
 
             <?php
-            for($x = 2; $x < sizeOf($song_names) ; $x++){
+            for($x = 2; $x < sizeOf($_SESSION["song_names"]) ; $x++){
                 ?>
-                <li class="queue-item"><strong><?php echo $song_names[$x]?></strong> <br>added by <strong><?php echo $users[$x + 2]?></strong> </li><hr class="song-hr">
+                <li class="queue-item"><strong><?php echo $_SESSION["song_names"][$x]?></strong> <br>added by <strong><?php echo $_SESSION["users"][$x + 2]?></strong> </li><hr class="song-hr">
                 <?php
             }
             ?>
@@ -354,36 +446,40 @@ while($currentrow = $results -> fetch_assoc()) {
                 <div id="playlist-share">
                     <p class="song-label" id="label-on-white">PLAYLIST</p>
                         <h2>Disney Songs</h2>
-                        <button id="resetBtn">Reset Playlist</button>
+                        <form action="playlist.php">
+                            <input type="hidden" name="id" value="<?php echo $_REQUEST["id"];?>">
+                            <input type="hidden" name="reset" value="true">
+                            <input type="submit" id="resetBtn" value="Reset Playlist">
+                        </form>
                     <div id="modal-columns">
                         <div class="modal-row">
                             <h3 class="modal-row-header">Song Queue</h3>
 
                             <ol id="listed-queue">
                                 <?php
-                                for($y = 0; $y < sizeof($songs); $y++){
+                                for($y = 0; $y < sizeof($_SESSION["songs"]); $y++){
                                    ?>
                                     <li>
                                         <strong>
-                                            <a target ='_blank' href='https://www.youtube.com/watch?v=<?php echo $songs[$y]?>'><?php echo $song_names[$y]?>
+                                            <a target ='_blank' href='https://www.youtube.com/watch?v=<?php echo $_SESSION["songs"][$y]?>'><?php echo $_SESSION["song_names"][$y]?>
                                         </strong>
                                         </a>
                                         <br> added by
-                                        <strong><?php echo $users[$y]?></strong>
-                                        <form action="playlist.php">
+                                        <strong><?php echo $_SESSION["users"][$y]?></strong>
+                                        <form name="load" action="playlist.php">
                                             <input type="hidden" name="id" value="<?php echo $_REQUEST["id"];?>">
                                             <input type="hidden" name="load_sent" value="true">
                                             <input type="hidden" name="position" value="<?php echo $y;?>">
-                                            <input class="queue-load" type="submit" value="Delete">
+                                            <input class="queue-load" type="submit" value="Load">
                                         </form>
                                     </li>
                                 <?php
                                     if($creator_id == $_SESSION["user_id"]){
                                         ?>
-                                        <form action="playlist.php">
+                                        <form name="delete" action="playlist.php">
                                             <input type="hidden" name="id" value="<?php echo $_REQUEST["id"];?>">
                                             <input type="hidden" name="delete_sent" value="true">
-                                            <input type="hidden" name="connection_id" value="<?php echo $connection_ids[$y];?>">
+                                            <input type="hidden" name="position" value="<?php echo $y;?>">
                                             <input class="queue-delete" type="submit" value="Delete">
                                         </form>
                                         <?php
@@ -395,25 +491,46 @@ while($currentrow = $results -> fetch_assoc()) {
                             </ol>
                         </div>
                         <div class="modal-row">
-                            <h3 class="modal-row-header">Contributors</h3>
+                            <h3 class="modal-row-header">Song Graveyard</h3>
+                            <p>Completed and Finished Songs</p>
                             <ul id="listed-queue">
                                 <?php
-                                $contributor_sql = "SELECT DISTINCT username FROM all_view2 WHERE playlist_id = " . $_REQUEST['id'];
-                                $contributors = $mysql -> query($contributor_sql);
-                                if(!$contributors){
-                                    echo 'SQL error: ' . $mysql -> error;
-                                    echo $contributor_sql;
-                                }else{
-                                    //echo 'query successful';
+                                var_dump($_SESSION["finished_song_names"]);
+                                for($y = 0; $y < sizeof($_SESSION["finished_songs"]); $y++){
+                                    ?>
+                                    <li>
+                                        <strong>
+                                            <a target ='_blank' href='https://www.youtube.com/watch?v=<?php echo $_SESSION["finished_songs"][$y]?>'><?php echo $_SESSION["finished_song_names"][$y]?>
+                                        </strong>
+                                        </a>
+                                        <br> added by
+                                        <strong><?php echo $_SESSION["finished_users"][$y]?></strong>
+                                        <form name="requeue" action="playlist.php">
+                                            <input type="hidden" name="id" value="<?php echo $_REQUEST["id"];?>">
+                                            <input type="hidden" name="requeue_sent" value="true">
+                                            <input type="hidden" name="position" value="<?php echo $y;?>">
+                                            <input class="queue-load" type="submit" value="Re-add">
+                                        </form>
+                                    </li>
+                                    <?php
                                 }
-                                while($contributor = $contributors -> fetch_assoc()){
-                                    echo "<li>" . $contributor["username"] . "</li>";
-                                }
-
-
                                 ?>
                             </ul>
                         </div>
+                        Contributors:
+                        <?php
+                        $contributor_sql = "SELECT DISTINCT username FROM all_view2 WHERE playlist_id = " . $_REQUEST['id'];
+                        $contributors = $mysql -> query($contributor_sql);
+                        if(!$contributors){
+                            echo 'SQL error: ' . $mysql -> error;
+                            echo $contributor_sql;
+                        }else{
+                            //echo 'query successful';
+                        }
+                        while($contributor = $contributors -> fetch_assoc()){
+                            echo "<li>" . $contributor["username"] . "</li>";
+                        }
+                        ?>
                     </div>
 
 
@@ -496,7 +613,70 @@ while($currentrow = $results -> fetch_assoc()) {
         ?>
 
     <div id="playlist-iframe">
-        <iframe id="video-player" width="100%" src="https://www.youtube.com/embed/cPAbx5kgCJo" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <iframe id="video-player"
+                width="100%"
+                src="http://www.youtube.com/embed/<?php echo $_SESSION["songs"][0]?>?enablejsapi=1"
+                frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         <p id="video-name"><strong><?php echo $currentsong?> </strong> added by <strong><?php echo $currentuser?></strong></p>
     </div>
+    <script>
+        var player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('video-player', {
+                playerVars: { 'autoplay': 1 },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+            console.log("created");
+        }
+        onYouTubeIframeAPIReady();
+
+        function onPlayerReady(event) {
+        }
+
+        function nextSong(playerStatus){
+            if(playerStatus === 0){
+                // if the video in the player is finished,
+                <?php
+
+                // 1. add to 'finished' set of arrays
+                array_push($_SESSION["finished_songs"], $_SESSION["songs"][0]);
+                array_push($_SESSION["finished_song_names"], $_SESSION["song_names"][0]);
+                array_push($_SESSION["finished_users"], $_SESSION["users"][0]);
+                array_push($_SESSION["finished_connection_ids"], $_SESSION["connection_ids"][0]);
+
+                // 2. remove first element from the active queue arrays
+                array_shift($_SESSION["songs"]);
+                array_shift($_SESSION["song_names"]);
+                array_shift($_SESSION["users"]);
+                array_shift($_SESSION["connection_ids"]);
+
+                ?>
+            }
+        }
+        /*function changeBorderColor(playerStatus) {
+            var color;
+            if (playerStatus === -1) {
+                color = "#37474F"; // unstarted = gray
+            } else if (playerStatus === 0) {
+                color = "#FFFF00"; // ended = yellow
+            } else if (playerStatus === 1) {
+                color = "#33691E"; // playing = green
+            } else if (playerStatus === 2) {
+                color = "#DD2C00"; // paused = red
+            } else if (playerStatus === 3) {
+                color = "#AA00FF"; // buffering = purple
+            } else if (playerStatus === 5) {
+                color = "#FF6DOO"; // video cued = orange
+            }
+            if (color) {
+                document.getElementById('video-player').style.borderColor = color;
+            }
+        } */
+        function onPlayerStateChange(event) {
+            nextSong(event.data);
+        }
+    </script>
 </div>
