@@ -23,7 +23,6 @@ if($_REQUEST["delete_sent"] == "true"){
     array_splice($_SESSION["song_names"], $_REQUEST["position"], 1);
     array_splice($_SESSION["users"], $_REQUEST["position"], 1);
     array_splice($_SESSION["connection_ids"], $_REQUEST["position"], 1);
-
     //header("Location: playlist.php?id=" . $_REQUEST["id"]);
 
 }
@@ -292,12 +291,12 @@ if(!$results){
 //has to happen before declaration of variables
 
 //if the first index is empty
-if($_SESSION["songs"][0] == ""){
+/*if($_SESSION["songs"][0] == ""){
     array_shift($_SESSION["songs"]);
     array_shift($_SESSION["song_names"]);
     array_shift($_SESSION["users"]);
     array_shift($_SESSION["connection_ids"]);
-}
+}*/
 if($_REQUEST["reset"] == "true" || sizeOf($_SESSION["songs"]) == 0 || $_SESSION["current_playlist"] != $playlist_id){
     // should only happen when:
     // 1. the playlist is reset $_SESSION["create_new"] == "yes"
@@ -331,6 +330,8 @@ if($_REQUEST["reset"] == "true" || sizeOf($_SESSION["songs"]) == 0 || $_SESSION[
         $creator_id = $currentrow["creator_id"];
         $playlist_title = $currentrow["playlist_title"];
     }
+    header("Location: playlist.php?id=" . $_REQUEST["id"]);
+
 }
 
 include "header.php";
@@ -495,7 +496,7 @@ include "header.php";
                             <p>Completed and Finished Songs</p>
                             <ul id="listed-queue">
                                 <?php
-                                var_dump($_SESSION["finished_song_names"]);
+                                //var_dump($_SESSION["finished_song_names"]);
                                 for($y = 0; $y < sizeof($_SESSION["finished_songs"]); $y++){
                                     ?>
                                     <li>
@@ -641,19 +642,24 @@ include "header.php";
                 // if the video in the player is finished,
                 <?php
 
-                // 1. add to 'finished' set of arrays
-                array_push($_SESSION["finished_songs"], $_SESSION["songs"][0]);
-                array_push($_SESSION["finished_song_names"], $_SESSION["song_names"][0]);
-                array_push($_SESSION["finished_users"], $_SESSION["users"][0]);
-                array_push($_SESSION["finished_connection_ids"], $_SESSION["connection_ids"][0]);
+                    if(empty($REQUEST["load_sent"]) && empty($REQUEST["delete_sent"]) && empty($REQUEST["requeue_sent"])){
+                        // 1. add to 'finished' set of arrays
+                        array_push($_SESSION["finished_songs"], $_SESSION["songs"][0]);
+                        array_push($_SESSION["finished_song_names"], $_SESSION["song_names"][0]);
+                        array_push($_SESSION["finished_users"], $_SESSION["users"][0]);
+                        array_push($_SESSION["finished_connection_ids"], $_SESSION["connection_ids"][0]);
 
-                // 2. remove first element from the active queue arrays
-                array_shift($_SESSION["songs"]);
-                array_shift($_SESSION["song_names"]);
-                array_shift($_SESSION["users"]);
-                array_shift($_SESSION["connection_ids"]);
+                        // 2. remove first element from the active queue arrays
+                        array_shift($_SESSION["songs"]);
+                        array_shift($_SESSION["song_names"]);
+                        array_shift($_SESSION["users"]);
+                        array_shift($_SESSION["connection_ids"]);
+                    }
+
 
                 ?>
+                location.replace("playlist.php?id=<?php echo $playlist_id?>");
+
             }
         }
         /*function changeBorderColor(playerStatus) {
