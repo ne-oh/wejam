@@ -1,0 +1,70 @@
+:root {
+    --darkgrey: #3c404d;
+    --lightyellow: #f7d447;
+    --lightgrey: #d1d0cf;
+    --white: #ffff;
+}
+
+@font-face {
+    font-family: "Glacial Indifference";
+    src: url(assets/GlacialIndifference-Regular.otf);
+    font-weight: normal;
+}
+
+body {
+    font-family: "Glacial Indifference", Arial, sans-serif;
+}
+
+h1, h2 {
+    font-weight: bold;
+}
+@media only screen and (min-width: 1200px) {
+    h1 {
+        font-size: 5rem;
+    }
+
+    h2 {
+        font-size: 4rem;
+    }
+
+    p {
+        font-size: 1.5rem;
+    }
+
+}
+
+.landing {
+    padding: 15vw 0;
+    background-image: url("assets/front.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position-y: bottom;
+    background-color: var(--lightgrey);
+}
+
+.about {
+    background-color: var(--darkgrey);
+}
+
+.about-content {
+    color: var(--lightgrey);
+    padding: 7vw 15 0 15;
+}
+
+.about-content p {
+    color: var(--lightyellow);
+    line-height: 2;
+}
+
+.audience {
+    background-color: var(--lightgrey);
+}
+
+.audience-content {
+    color: var(--darkgrey);
+    padding: 7vw 15 0 15;
+}
+
+.audience-content p {
+    line-height: 2;
+}
