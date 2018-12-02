@@ -1,0 +1,529 @@
+@font-face {
+    font-family: "Glacial Indifference";
+    src: url(assets/GlacialIndifference-Regular.otf);
+    font-weight: normal;
+}
+#loginblock{
+    text-align: center;
+    font-size: 20px;
+
+}
+
+#logintitle{
+    margin-left:200px;
+}
+#creationblock{
+    text-align: center;
+    font-size: 20px;
+
+}
+#createtitle {
+    margin-left:100px;
+}
+@font-face {
+    font-family: "Glacial Indifference";
+    src: url(assets/GlacialIndifference-Bold.otf);
+    font-weight: bold;
+}
+
+.margin-top-push{
+    margin-top: 5%;
+}
+body {
+    background-color: var(--lightgrey);
+    font-family: "Glacial Indifference", normal;
+
+}
+
+h1 {
+    color: var(--darkgrey);
+    font-size: 70pt;
+    margin-left: 300px;
+}
+
+
+h2 {
+    color: black;
+    font-size: 20pt;
+    margin-bottom: 10pt;
+
+
+
+
+}
+
+h3 {
+    color: var(--lightgrey);
+    font-size: 50pt;
+
+
+
+}
+
+h32 {
+    color: black;
+    font-size: 20pt;
+    margin-left: 20pt;
+
+
+
+}
+
+h20{
+    color:black;
+    font-size: 20pt;
+    margin-left: 1550px;
+    margin-top: -300px;
+}
+h22 {
+    color: black;
+    font-size: 20pt;
+    margin-left: 15pt;
+
+
+
+}
+
+h31 {
+    color: black;
+    font-size: 50pt;
+
+
+
+}
+
+h4 {
+    color: var(--darkgrey);
+    font-size: 20pt;
+    margin-top: -200pt;
+    margin-left: 900px;
+
+}
+
+
+p {
+    color: var(--lightyellow);
+    font-size: 18pt;
+}
+
+p2 {
+    color: var(--lightyellow);
+    font-size: 18pt;
+}
+
+p1 {
+    color: var(--darkgrey);
+    font-size: 18pt;
+}
+
+:root {
+    --darkgrey: #3c404d;
+    --lightyellow: #f7d447;
+    --lightgrey: #d1d0cf;
+    --white: #ffff;
+
+}
+
+img1 {
+    width: 150px;
+    margin: 600px;
+
+}
+
+.img2 {
+    width: 1200px;
+    position:relative;
+    margin-top: 400px;
+    margin-left: 575px;
+}
+
+.block1 {
+    height: 700px;
+    width: 100%;
+    margin-top: -5px;
+
+
+
+    background-color:var(--darkgrey);
+}
+
+.img3 {
+    position: relative;
+    width: 100%;
+    margin-top: 70px;
+    opacity: 0.5;
+
+
+    /*
+        margin-top: -100px;
+        margin-left: 200pt;
+    */
+}
+
+.img4 {
+    width: 1200px;
+    position:relative;
+    margin-top: -150px;
+    margin-left: 0px;
+}
+
+
+
+.rectangle {
+    height: 70px;
+    width: 170pt;
+    margin-left:665pt;
+    position: absolute;
+    margin-top: -959pt;
+    border-radius: 15px 15px 15px 15px;
+    background-color:var(--lightyellow);
+}
+
+.rectangle2 {
+    height: 70px;
+    width: 170pt;
+    margin-left:355pt;
+    margin-top: -958pt;
+    border-radius: 15px 15px 15px 15px;
+    background-color:var(--lightyellow);
+}
+
+
+
+
+
+#header{
+    background-color: #3c404d;
+    margin: -1.5%;
+    text-align: center;
+}
+
+#name {
+    width: 100px;
+    stroke: rgba(0,0,0,.5);
+}
+
+.path {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: dash 7.5s linear forwards;
+
+}
+
+@keyframes dash {
+    from {
+        stroke-dashoffset: 1000;
+    }
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.path1 {
+    stroke-dasharray: 1500;
+    stroke-dashoffset: 1500;
+    animation: dash 5s linear forwards;
+
+}
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.path2 {
+    stroke-dasharray: 500;
+    stroke-dashoffset: 500;
+    animation: dash 7.5s linear forwards;
+
+}
+
+@keyframes dash {
+
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.blocks{
+    height: 700px;
+    width: 100%;
+    background-color:var(--lightyellow);
+    position: absolute;
+
+}
+
+.ftext{
+
+    margin-left: 40px;
+    margin-top: 50px;
+}
+
+.ttext{
+    margin-left: 850px;
+    margin-top: -500px;
+}
+
+
+
+
+/* THIS IS ALL THE MENU HAMBURGER NAV STUFF */
+/* THIS IS ALL THE MENU HAMBURGER NAV STUFF */
+/* THIS IS ALL THE MENU HAMBURGER NAV STUFF */
+/* THIS IS ALL THE MENU HAMBURGER NAV STUFF */
+/* THIS IS ALL THE MENU HAMBURGER NAV STUFF */
+
+a
+{
+    text-decoration: none;
+    color: #232323;
+
+    transition: color 0.3s ease;
+}
+
+a:hover
+{
+    color: tomato;
+}
+
+#menuToggle
+{
+    display: block;
+    position: relative;
+    top: 50px;
+    left: 50px;
+
+    z-index: 1;
+
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+#menuToggle input
+{
+    display: block;
+    width: 40px;
+    height: 32px;
+    position: absolute;
+    top: -7px;
+    left: -5px;
+
+    cursor: pointer;
+
+    opacity: 0; /* hide this */
+    z-index: 2; /* and place it over the hamburger */
+
+    -webkit-touch-callout: none;
+}
+
+/*
+ * Just a quick hamburger
+ */
+#menuToggle span
+{
+    display: block;
+    width: 33px;
+    height: 4px;
+    margin-bottom: 5px;
+    position: relative;
+
+    background: black;
+    border-radius: 3px;
+
+    z-index: 1;
+
+    transform-origin: 4px 0px;
+
+    transition: transform 0.5s cubic-bezier(0.77,0.2,0.05,1.0),
+    background 0.5s cubic-bezier(0.77,0.2,0.05,1.0),
+    opacity 0.55s ease;
+}
+
+#menuToggle span:first-child
+{
+    transform-origin: 0% 0%;
+}
+
+#menuToggle span:nth-last-child(2)
+{
+    transform-origin: 0% 100%;
+}
+
+/*
+ * Transform all the slices of hamburger
+ * into a crossmark.
+ */
+#menuToggle input:checked ~ span
+{
+    opacity: 1;
+    transform: rotate(45deg) translate(-2px, -1px);
+    background: #232323;
+}
+
+/*
+ * But let's hide the middle one.
+ */
+#menuToggle input:checked ~ span:nth-last-child(3)
+{
+    opacity: 0;
+    transform: rotate(0deg) scale(0.2, 0.2);
+}
+
+/*
+ * Ohyeah and the last one should go the other direction
+ */
+#menuToggle input:checked ~ span:nth-last-child(2)
+{
+    transform: rotate(-45deg) translate(0, -1px);
+}
+
+/*
+ * Make this absolute positioned
+ * at the top left of the screen
+ */
+#menu
+{
+    position: absolute;
+    width: 300px;
+    margin: -100px 0 0 -50px;
+    padding: 50px;
+    padding-top: 125px;
+
+    background: #ededed;
+    list-style-type: none;
+    -webkit-font-smoothing: antialiased;
+    /* to stop flickering of text in safari */
+
+    transform-origin: 0% 0%;
+    transform: translate(-100%, 0);
+
+    transition: transform 0.5s cubic-bezier(0.77,0.2,0.05,1.0);
+}
+
+#menu li
+{
+    padding: 10px 0;
+    font-size: 22px;
+}
+
+/*
+ * And let's slide it in from the left
+ */
+#menuToggle input:checked ~ ul
+{
+    transform: none;
+}
+
+
+/* THIS IS THE END OF ALL THE MENU HAMBURGER NAV STUFF */
+/* THIS IS THE END OF ALL THE MENU HAMBURGER NAV STUFF */
+/* THIS IS THE END OF ALL THE MENU HAMBURGER NAV STUFF */
+/* THIS IS THE END OF ALL THE MENU HAMBURGER NAV STUFF */
+
+
+#aboutfill {
+    width: 800px;
+    height: auto;
+    padding-left: 25%;
+}
+
+#aboutfill1 {
+    width: 800px;
+    height: auto;
+    padding-left: 18%;
+}
+
+#abouttop1 {
+    width: 1000px;
+    height: auto;
+    padding-left: 15%;
+}
+
+
+#contactfill {
+    width: 1000px;
+    height: auto;
+    padding-left: 14%;
+}
+
+
+
+
+/* CONTACT FORM STUFF */
+form {
+    max-width: 600px;
+    text-align: center;
+    margin: 20px auto;
+}
+input, textarea {
+    border:0; outline:0;
+    padding: 1em;
+@include border-radius(8px);
+    display: block;
+    width: 100%;
+    margin-top: 1em;
+    font-family: 'Merriweather', sans-serif;
+@include box-shadow(0 1px 1px rgba(black, 0.1));
+    resize: none;
+
+&:focus {
+ @include box-shadow(0 0px 2px rgba($red, 1)!important);
+ }
+}
+
+#input-submit {
+    color: var(--darkgrey);
+    background: $red;
+    cursor: pointer;
+
+&:hover {
+ @include box-shadow(0 1px 1px 1px rgba(#aaa, 0.6));
+ }
+}
+
+textarea {
+    height: 126px;
+}
+}
+
+
+.half {
+    float: left;
+    width: 48%;
+    margin-bottom: 1em;
+}
+
+.right { width: 50%; }
+
+.left {
+    margin-right: 2%;
+}
+
+
+@media (max-width: 480px) {
+    .half {
+        width: 100%;
+        float: none;
+        margin-bottom: 0;
+    }
+}
+
+
+/* Clearfix */
+.cf:before,
+.cf:after {
+    content: " "; /* 1 */
+    display: table; /* 2 */
+}
+
+.cf:after {
+    clear: both;
+}
+/* CONTACT FORM STUFF END */
+
+
+.topchartimg {
+    padding-top: 30px;
+    margin-right: 500px;
+}
