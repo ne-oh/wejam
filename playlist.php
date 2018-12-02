@@ -1,16 +1,6 @@
 <?php
 session_start();
 
-/*$_SESSION["songs"] = array();
-$_SESSION["song_names"] = array();
-$_SESSION["users"] = array();
-$_SESSION["connection_ids"] = array();
-
-$_SESSION["finished_songs"] = array();
-$_SESSION["finished_song_names"] = array();
-$_SESSION["finished_users"] = array();
-$_SESSION["finished_connection_ids"] = array();*/
-
 $playlist_id = $_REQUEST["id"];
 
 function moveElement(&$array, $from, $to) {
@@ -255,6 +245,19 @@ $mysql = new mysqli(
     $db
 );
 
+if($mysql->connect_errno) {
+    echo "db connection error : " . $mysql->connect_error;
+    exit();
+}
+$sql = "SELECT * FROM all_view2 WHERE playlist_id = " . $_REQUEST["id"];
+$results = $mysql -> query($sql);
+if(!$results){
+    echo 'SQL error: ' . $mysql -> error;
+    echo $sql;
+}else{
+    //echo 'query successful';
+}
+
 //VISITS SQL
 $visit_sql = "SELECT * FROM playlists WHERE playlist_id = " . $_REQUEST["id"];
 $visit_results = $mysql -> query($visit_sql);
@@ -269,18 +272,7 @@ $incremented_visits = $current_playlist["visits"] + 1;
 $visit_increment_sql = "UPDATE playlists SET visits = " . $incremented_visits . "WHERE playlist_id = " . $_REQUEST["id"];
 $visits_update = $mysql -> query($visit_increment_sql);
 
-if($mysql->connect_errno) {
-    echo "db connection error : " . $mysql->connect_error;
-    exit();
-}
-$sql = "SELECT * FROM all_view2 WHERE playlist_id = " . $_REQUEST["id"];
-$results = $mysql -> query($sql);
-if(!$results){
-    echo 'SQL error: ' . $mysql -> error;
-    echo $sql;
-}else{
-    //echo 'query successful';
-}
+
 
 //has to happen before declaration of variables
 
@@ -359,6 +351,7 @@ include "header.php";
     $currentuser = $_SESSION["users"][$x];
     ?>
     <ul id="playing-now">
+
         <p class="song-label">NOW PLAYING</p>
         <li class="queue-item"><strong><?php echo $_SESSION["song_names"][$x]?> </strong> <br>added by <strong><?php echo $_SESSION["users"][$x]?></strong> </li><hr class="current-song">
     </ul>
@@ -646,11 +639,8 @@ include "header.php";
                         array_shift($_SESSION["users"]);
                         array_shift($_SESSION["connection_ids"]);
                     }
-
-
                 ?>
                 location.replace("playlist.php?id=<?php echo $playlist_id?>");
-
             }
         }
 
