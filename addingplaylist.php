@@ -37,7 +37,7 @@ if(empty($_REQUEST["creating"])){
     }else{
         //echo "<hr>Size of array URL: " . sizeof($_REQUEST["url"]) . "<hr> <br>";
         function getYoutubeID($url){
-            $cut = substr($url, strrpos($url, "=") + 1);
+            $cut = substr($url, strrpos($url, "=") + 1, 11);
             return $cut;
         }
         include "header.php";

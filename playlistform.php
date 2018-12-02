@@ -18,7 +18,7 @@
 
         $("#addanother").on("click", function(){
             $("#inputgroup").append("<input type='url' name='url[]' placeholder=\"https://www.youtube.com/watch?v=0tmKy2awfxE\"  " +
-                "pattern=\"https?:\\/\\/www\\.youtube\\.com\\/watch\\?v.*\" title=\"Valid link required\" required> " +
+                "pattern=\"https?:\\/\\/www\\.youtube\\.com\\/watch\\?v.*\" title=\"Valid link required. \" required> " +
             "<span class='delete'> | Delete</span><br>");
         });
 
