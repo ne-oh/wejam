@@ -315,13 +315,14 @@ $visit_sql = "SELECT * FROM playlists WHERE playlist_id = " . $_REQUEST["id"];
 $visit_results = $mysql -> query($visit_sql);
 if(!$visit_results){
     echo 'SQL error: ' . $mysql -> error;
-    echo $sql;
+    //echo $sql;
 }else{
     //echo 'query successful';
 }
+
 $current_playlist = $visit_results -> fetch_assoc();
-$incremented_visits = $current_playlist["visits"] + 1;
-$visit_increment_sql = "UPDATE playlists SET visits = " . $incremented_visits . "WHERE playlist_id = " . $_REQUEST["id"];
+$incremented_visits = (int)$current_playlist["visits"] + 1;
+$visit_increment_sql = "UPDATE playlists SET visits = " . (int)$incremented_visits . " WHERE playlist_id = " . $_REQUEST["id"];
 $visits_update = $mysql -> query($visit_increment_sql);
 
 
@@ -692,3 +693,4 @@ include "header.php";
         }
     </script>
 </div>
+<?php echo $incremented_visits;?>
