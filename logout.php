@@ -6,10 +6,5 @@
  * Time: 9:45 PM
  */
 session_start();
-$_SESSION["username"] = "";
-$_SESSION["password"] = "";
-$_SESSION["email"] = "";
-$_SESSION["user_id"] = "";
-$_SESSION["loggedin"] = "";
-
+session_destroy();
 header('Location: home.php');

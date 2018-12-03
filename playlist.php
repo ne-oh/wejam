@@ -178,7 +178,15 @@ else if($_REQUEST["controls"] == "queue"){
     header("Location: playlist.php?id=" . $_REQUEST["id"]);
     exit();
 }
+else if($_REQUEST["sent"] == "true"){
+    mail($_REQUEST["email"],
+                $_REQUEST["subject"],
+                $_REQUEST["message"],
+                $_SESSION["username"] . " <". $_SESSION["email"] ."> ");
 
+    header("Location: playlist.php?id=" . $_REQUEST["id"]);
+    exit();
+}
 ?>
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -469,7 +477,7 @@ if($_REQUEST["controls"] == "reset" || sizeOf($_SESSION["songs"]) == 0 || $_SESS
     }
 
 }
-
+include "useronlyzone.php";
 include "header.php";
 
 ?>
@@ -627,7 +635,7 @@ include "header.php";
                                         </form>
                                     </li>
                                 <?php
-                                    if(true || $creator_id == $_SESSION["user_id"]){
+                                    if($creator_id == $_SESSION["user_id"]){
                                         ?>
                                         <form name="delete" action="playlist.php">
                                             <input type="hidden" name="id" value="<?php echo $_REQUEST["id"];?>">
@@ -745,26 +753,20 @@ include "header.php";
                 <div id="playlist-share">
                     <form action="playlist.php">
                         <h2>Share this playlist</h2>
+                        <input type="hidden" name="id" value="<?php echo $_REQUEST["id"];?>">
                         <input type="hidden" name="sent" value="true">
                         Subject<input class = "share-modal" type="text" name="subject" value="Join this playlist <?php echo $currentrow["user"]?> "><br>
                         Recipient <input class = "share-modal" type="email" name="email" placeholder="lorem@usc.edu" required><br>
                         Message<input class = "share-modal" type="textarea" name="message" value="Check out this
-        <a href='http://webdev.iyaserver.com/~annieoh/wejam/playlist.php?playlist_id=<?php echo $_REQUEST["playlist_id"]?>'>playlist</a> on
-        <a href='http://webdev.iyaserver.com/~annieoh/wejam/home.php'>WeJam</a>.<br><hr>
-        It's a collaborative playlist so your friends can decide what songs you'd like to listen to together. "><br>
+        playlist: http://webdev.iyaserver.com/~annieoh/wejam/playlist.php?playlist_id=<?php echo $_REQUEST["id"]?> on
+        WeJam.
+        WeJam is a collaborative playlist so your friends can decide what songs you'd like to listen to together. "><br>
                         <input class = "share-modal" type="submit">
                     </form>
                 </div>
             </div>
         </div>
-        <?php
-        if($_REQUEST["sent"] == "true"){
-            mail($_REQUEST["email"],
-                $_REQUEST["subject"],
-                $_REQUEST["message"],
-                "WeJam");
-        }
-        ?>
+
 
     <div class="playlist-iframe" id="bottom-iframe">
         <iframe id="video-player"
