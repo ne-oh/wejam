@@ -8,7 +8,53 @@ function moveElement(&$array, $from, $to) {
     array_splice($array, $to, 0, $out);
 }
 
-if($_REQUEST["controls"] == "delete"){
+function seededShuffle(array &$array, $seed) {
+    mt_srand($seed);
+    $size = count($array);
+    for ($i = 0; $i < $size; ++$i) {
+        list($chunk) = array_splice($array, mt_rand(0, $size-1), 1);
+        array_push($array, $chunk);
+    }
+}
+
+if($_REQUEST["controls"] == "next"){
+   if($_SESSION["loop"] == "true"){
+       moveElement($_SESSION["songs"], $_REQUEST["position"], sizeof($_SESSION["songs"])-1);
+       moveElement($_SESSION["song_names"], $_REQUEST["position"], sizeof($_SESSION["songs"])-1);
+       moveElement($_SESSION["users"], $_REQUEST["position"], sizeof($_SESSION["songs"])-1);
+       moveElement($_SESSION["connection_ids"], $_REQUEST["position"], sizeof($_SESSION["songs"])-1);
+
+       header("Location: playlist.php?id=" . $_REQUEST["id"]);
+       exit();
+   }
+   // 1. add to 'finished' set of arrays
+   array_push($_SESSION["finished_songs"], $_SESSION["songs"][0]);
+   array_push($_SESSION["finished_song_names"], $_SESSION["song_names"][0]);
+   array_push($_SESSION["finished_users"], $_SESSION["users"][0]);
+   array_push($_SESSION["finished_connection_ids"], $_SESSION["connection_ids"][0]);
+
+   // 2. remove first element from the active queue arrays
+   array_shift($_SESSION["songs"]);
+   array_shift($_SESSION["song_names"]);
+   array_shift($_SESSION["users"]);
+   array_shift($_SESSION["connection_ids"]);
+
+   header("Location: playlist.php?id=" . $_REQUEST["id"]);
+   exit();
+} else if($_REQUEST["controls"] == "shuffle"){
+   $seed = rand();
+   seededShuffle($_SESSION["songs"], $seed);
+   seededShuffle($_SESSION["song_names"], $seed);
+   seededShuffle($_SESSION["users"], $seed);
+   seededShuffle($_SESSION["connection_ids"], $seed);
+
+   header("Location: playlist.php?id=" . $_REQUEST["id"]);
+   exit();
+} else if($_REQUEST["controls"] == "loop"){
+   $_SESSION["loop"] = !($_SESSION["loop"]);
+   header("Location: playlist.php?id=" . $_REQUEST["id"]);
+   exit();
+} else if($_REQUEST["controls"] == "delete"){
     array_push($_SESSION["finished_songs"],$_SESSION["songs"][$_REQUEST["position"]] );
     array_push($_SESSION["finished_song_names"], $_SESSION["song_names"][$_REQUEST["position"]]);
     array_push($_SESSION["finished_users"], $_SESSION["users"][$_REQUEST["position"]]);
@@ -20,8 +66,8 @@ if($_REQUEST["controls"] == "delete"){
     array_splice($_SESSION["connection_ids"], $_REQUEST["position"], 1);
 
     header("Location: playlist.php?id=" . $_REQUEST["id"]);
-}
-if($_REQUEST["controls"] == "load"){
+    exit();
+} else if($_REQUEST["controls"] == "load"){
 //save the information of the song you're trying to load
     moveElement($_SESSION["songs"], $_REQUEST["position"], 0);
     moveElement($_SESSION["song_names"], $_REQUEST["position"], 0);
@@ -29,14 +75,20 @@ if($_REQUEST["controls"] == "load"){
     moveElement($_SESSION["connection_ids"], $_REQUEST["position"], 0);
 
     header("Location: playlist.php?id=" . $_REQUEST["id"]);
-}
-if($_REQUEST["controls"] == "requeue"){
+    exit();
+} else if($_REQUEST["controls"] == "requeue"){
     array_push($_SESSION["songs"], $_SESSION["finished_songs"][$_REQUEST["position"]]);
     array_push($_SESSION["users"], $_SESSION["finished_users"][$_REQUEST["position"]]);
     array_push($_SESSION["song_names"], $_SESSION["finished_song_names"][$_REQUEST["position"]]);
     array_push($_SESSION["connection_ids"], $_SESSION["finished_connection_ids"][$_REQUEST["position"]]);
 
+    array_splice($_SESSION["finished_songs"], $_REQUEST["position"], 1);
+    array_splice($_SESSION["finished_song_names"], $_REQUEST["position"], 1);
+    array_splice($_SESSION["finished_users"], $_REQUEST["position"], 1);
+    array_splice($_SESSION["finished_connection_ids"], $_REQUEST["position"], 1);
+
     header("Location: playlist.php?id=" . $_REQUEST["id"]);
+    exit();
 }
 
 ?>
@@ -414,8 +466,16 @@ include "header.php";
 
 
     <div id="bottom-left-controls">
-        <button id="shuffleBtn">Shuffle</button>
-        <button id="loopBtn">Loop</button>
+      <form action="playlist.php">
+          <input type="hidden" name="id" value="<?php echo $_REQUEST["id"];?>">
+          <input type="hidden" name="controls" value="shuffle">
+           <button id="shuffleBtn" type="submit">Shuffle</button>
+      </form>
+      <form action="playlist.php">
+          <input type="hidden" name="id" value="<?php echo $_REQUEST["id"];?>">
+          <input type="hidden" name="controls" value="loop">
+          <button id="loopBtn" type="submit"><?php echo ($_SESSION["loop"] ? "Turn loop OFF" : "Turn loop ON") ?></button>
+      </form>
         <button id="queueBtn">Queue</button>
         <button id="infoBtn">Info</button>
         <button id="shareBtn">Share Playlist</button>
@@ -453,13 +513,13 @@ include "header.php";
                                         <strong><?php echo $_SESSION["users"][$y]?></strong>
                                         <form name="load" action="playlist.php">
                                             <input type="hidden" name="id" value="<?php echo $_REQUEST["id"];?>">
-                                            <input type="hidden" name="controls" value="delete">
+                                            <input type="hidden" name="controls" value="load">
                                             <input type="hidden" name="position" value="<?php echo $y;?>">
                                             <input class="queue-load" type="submit" value="Load">
                                         </form>
                                     </li>
                                 <?php
-                                    if($creator_id == $_SESSION["user_id"]){
+                                    if(true || $creator_id == $_SESSION["user_id"]){
                                         ?>
                                         <form name="delete" action="playlist.php">
                                             <input type="hidden" name="id" value="<?php echo $_REQUEST["id"];?>">
@@ -623,24 +683,7 @@ include "header.php";
 
         function nextSong(playerStatus){
             if(playerStatus === 0){
-                // if the video in the player is finished,
-                <?php
-
-                    if(empty($REQUEST["controls"])){
-                        // 1. add to 'finished' set of arrays
-                        array_push($_SESSION["finished_songs"], $_SESSION["songs"][0]);
-                        array_push($_SESSION["finished_song_names"], $_SESSION["song_names"][0]);
-                        array_push($_SESSION["finished_users"], $_SESSION["users"][0]);
-                        array_push($_SESSION["finished_connection_ids"], $_SESSION["connection_ids"][0]);
-
-                        // 2. remove first element from the active queue arrays
-                        array_shift($_SESSION["songs"]);
-                        array_shift($_SESSION["song_names"]);
-                        array_shift($_SESSION["users"]);
-                        array_shift($_SESSION["connection_ids"]);
-                    }
-                ?>
-                location.replace("playlist.php?id=<?php echo $playlist_id?>");
+                location.replace("playlist.php?id=<?php echo $playlist_id?>&controls=next");
             }
         }
 
