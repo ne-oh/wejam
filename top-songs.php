@@ -44,6 +44,7 @@ $results = $mysql -> query($sql);
             <td class="rank-data">Theme</td>
             <td class="rank-data">Creator</td>
             <td class="rank-data">Visits</td>
+            <td class="rank-data"># of Songs</td>
         </tr> <?php
     $chart = array();
     $views = array();
@@ -53,10 +54,15 @@ while($currentrow = $results -> fetch_assoc()){
     $user_results = $mysql -> query($user_sql);
     $current_user = $user_results -> fetch_assoc();
 
-    $current = $currentrow["title"] . " by " . $current_user["username"];
-    array_push($chart, $current);
-    array_push($views, (int)$currentrow["visits"]);
-    ?>
+    $count_sql = "SELECT COUNT(title)
+FROM all_view2
+WHERE playlist_id = " . $currentrow["playlist_id"];
+    $count_results = $mysql -> query($count_sql);
+    while($current_count = $count_results -> fetch_assoc()){
+        $current = $currentrow["title"] . " by " . $current_user["username"];
+        array_push($chart, $current);
+        array_push($views, (int)$currentrow["visits"]);
+        ?>
 
         <tr>
             <td class="rank-data"><?php echo $counter; $counter++; ?></td>
@@ -64,9 +70,14 @@ while($currentrow = $results -> fetch_assoc()){
             <td class="rank-data"><?php echo $currentrow["theme"]; ?></td>
             <td class="rank-data"><?php echo $current_user["username"]; ?></td>
             <td class="rank-data"><?php echo (int)$currentrow["visits"]; ?></td>
+            <td class="rank-data"><?php echo $current_count["COUNT(title)"]; ?> </td>
         </tr>
+
+
+
+
     <?php
-}
+}}
 ?>
 
 </table>
