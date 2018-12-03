@@ -16,7 +16,7 @@ include "admin-header.php";
 <div id="admin-panel">
     <h1>Admin Panel</h1>
     <hr>
-    <a href="data-vis.php"><h2>Data Visualization (including GA) </h2></a>
+    <a href="data-vis.php"><h2>Google Analytics </h2></a>
     <a href="adminview.php?key=0"><h2>Database changes</h2></a>
     <a href="adminview.php?key=1">Playlists (Add, update, delete)</a><br>
     <a href="adminview.php?key=2">Users (Add, update, delete)</a><br>
