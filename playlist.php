@@ -183,10 +183,11 @@ if($_REQUEST["controls"] == "next"){
         left: 0;
         top: 8vh;
     }
-    #playlist-iframe{
+    .playlist-iframe{
         width:80%;
         float:right;
         overflow-y: scroll; overflow-x:hidden;
+        margin-top: -3%;
     }
     #header{
         margin-bottom: 0%;
@@ -280,6 +281,32 @@ if($_REQUEST["controls"] == "next"){
         border: black 1px solid;
         background-color: ghostwhite;
         padding: 5%;
+    }
+    #top-iframe{
+        display:none;     }
+    #bottom-iframe{
+        display: initial;
+    }
+    @media (max-width: 1281px) {
+
+    .playlist-iframe{
+        width: 100%;
+    }
+    #playlist-sidebar{
+        position: static;
+        width: 100%;
+        overflow: visible;
+    }
+    #bottom-left-controls{
+        position: static;
+        width: 100%;
+    }
+#top-iframe{
+    display: initial;
+}
+#bottom-iframe{
+    display: none;
+}
     }
 
 </style>
@@ -376,6 +403,13 @@ include "header.php";
 
 <title><?php echo "🎶" . $playlist_title?></title>
 <div id="playlist-view">
+    <div class="playlist-iframe" id="top-iframe">
+        <iframe id="video-player"
+                width="100%"
+                src="http://www.youtube.com/embed/<?php echo $_SESSION["songs"][0]?>?enablejsapi=1"
+                frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <p id="video-name"><strong><?php echo $currentsong?> </strong> added by <strong><?php echo $currentuser?></strong></p>
+    </div>
 <div id="playlist-sidebar">
     <ul>
         <p class="song-label">PLAYLIST</p>
@@ -415,7 +449,7 @@ include "header.php";
             <?php
             for($x = 2; $x < sizeOf($_SESSION["song_names"]) ; $x++){
                 ?>
-                <li class="queue-item"><strong><?php echo $_SESSION["song_names"][$x]?></strong> <br>added by <strong><?php echo $_SESSION["users"][$x + 2]?></strong> </li><hr class="song-hr">
+                <li class="queue-item"><strong><?php echo $_SESSION["song_names"][$x]?></strong> <br>added by <strong><?php echo $_SESSION["users"][$x]?></strong> </li><hr class="song-hr">
                 <?php
             }
             ?>
@@ -658,7 +692,7 @@ include "header.php";
         }
         ?>
 
-    <div id="playlist-iframe">
+    <div class="playlist-iframe" id="bottom-iframe">
         <iframe id="video-player"
                 width="100%"
                 src="http://www.youtube.com/embed/<?php echo $_SESSION["songs"][0]?>?enablejsapi=1"
@@ -693,4 +727,3 @@ include "header.php";
         }
     </script>
 </div>
-<?php echo $incremented_visits;?>
