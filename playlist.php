@@ -2,6 +2,22 @@
 session_start();
 
 $playlist_id = $_REQUEST["id"];
+$host = "webdev.iyaserver.com";
+$userid = "annieoh";
+$userpw = "Iya2248350694";
+$db = "annieoh_playlists";
+
+$mysql = new mysqli(
+    $host,
+    $userid,
+    $userpw,
+    $db
+);
+
+if($mysql->connect_errno) {
+    echo "db connection error : " . $mysql->connect_error;
+    exit();
+}
 
 function moveElement(&$array, $from, $to) {
     $out = array_splice($array, $from, 1);
@@ -76,7 +92,8 @@ if($_REQUEST["controls"] == "next"){
 
     header("Location: playlist.php?id=" . $_REQUEST["id"]);
     exit();
-} else if($_REQUEST["controls"] == "requeue"){
+}
+else if($_REQUEST["controls"] == "requeue"){
     array_push($_SESSION["songs"], $_SESSION["finished_songs"][$_REQUEST["position"]]);
     array_push($_SESSION["users"], $_SESSION["finished_users"][$_REQUEST["position"]]);
     array_push($_SESSION["song_names"], $_SESSION["finished_song_names"][$_REQUEST["position"]]);
@@ -86,6 +103,77 @@ if($_REQUEST["controls"] == "next"){
     array_splice($_SESSION["finished_song_names"], $_REQUEST["position"], 1);
     array_splice($_SESSION["finished_users"], $_REQUEST["position"], 1);
     array_splice($_SESSION["finished_connection_ids"], $_REQUEST["position"], 1);
+
+    header("Location: playlist.php?id=" . $_REQUEST["id"]);
+    exit();
+}
+else if($_REQUEST["controls"] == "queue"){
+    function getYoutubeID($url){
+        $cut = substr($url, strpos($url, "=") + 1, 11);
+        return $cut;
+    }
+    $playlist_songs_sql = "INSERT INTO playlist_songs (playlist_id, song_id) VALUES ";
+
+
+    for ($k = 0; $k < sizeof($_REQUEST["url"]); $k++){
+        //echo $_REQUEST["url"][$k];
+        $api_key = "AIzaSyCRxFDoQrJAk1H16wrkDnLKF1eup9TkvlM";
+        $video_url = $_REQUEST["url"][$k];
+        $video_id = getYoutubeID($video_url);
+        //echo " | (" . $video_id . ")<br>";
+
+        $api_url = 'https://www.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&id=' . $video_id . '&key=' . $api_key;
+
+        $data = json_decode(file_get_contents($api_url));
+
+        $title = str_replace('"', '', str_replace("'","",$data->items[0]->snippet->title));
+        $desc = str_replace('"', '', str_replace("'","",$data->items[0]->snippet->description));
+        $duration = $data->items[0]->contentDetails->duration;
+// 2. Songs from url form array added to <songs>
+        $sql = "INSERT INTO songs
+                     (title, url, description, user_id, duration, youtube_id)
+                     VALUES 
+                     ('". $title ."', '". $video_url ."', '". $desc ."', '". $_SESSION["user_id"] ."', '". $duration ."', '". $video_id ."')";
+        //echo $sql;
+        $send = $mysql -> query($sql);
+        if(!$send){
+            echo 'SQL error for $send_song: ' . $mysql -> error;
+        }else{
+            //echo 'query successful';
+        }
+        //finding the song that was just added to the database
+        $sql = "SELECT DISTINCT * FROM songs WHERE title = '". $title ."' AND url = '".$video_url ."' AND user_id =" . $_SESSION["user_id"];
+        $results = $mysql -> query($sql);
+        if(!$results){
+            echo 'SQL error for $song_result: ' . $mysql -> error;
+        }else{
+            //echo 'query successful';
+        }
+        $currentrow = $results -> fetch_assoc();
+        if($k == 0){
+            $playlist_songs_sql .= "(". $playlist_id .", ". $currentrow["song_id"] .")";
+        }else{
+            $playlist_songs_sql .= ", (". $playlist_id .", ". $currentrow["song_id"] .")";
+        }
+
+        //echo $playlist_songs_sql . "<hr>";
+        array_push($_SESSION["songs"], $currentrow["youtube_id"]);
+        array_push($_SESSION["song_names"], $title);
+        $song_user_sql = "SELECT * FROM users WHERE user_id = " . $currentrow["user_id"];
+        $song_user_results = $mysql -> query($song_user_sql);
+        $current_song_user = $song_user_results -> fetch_assoc();
+        array_push($_SESSION["users"], $current_song_user["username"]);
+
+    }
+    // 3. Added songs connected to the created playlist in <playlist_songs>
+    $playlist_songs_sql .= ";";
+    $send = $mysql -> query($playlist_songs_sql);
+    if(!$send){
+        echo 'SQL error for $send_playlist_songs: ' . $mysql -> error;
+        //echo "<br>" . $playlist_songs_sql;
+    }else{
+        //echo 'query successful';
+    }
 
     header("Location: playlist.php?id=" . $_REQUEST["id"]);
     exit();
@@ -312,22 +400,7 @@ if($_REQUEST["controls"] == "next"){
 </style>
 
 <?php
-$host = "webdev.iyaserver.com";
-$userid = "annieoh";
-$userpw = "Iya2248350694";
-$db = "annieoh_playlists";
 
-$mysql = new mysqli(
-    $host,
-    $userid,
-    $userpw,
-    $db
-);
-
-if($mysql->connect_errno) {
-    echo "db connection error : " . $mysql->connect_error;
-    exit();
-}
 $sql = "SELECT * FROM all_view2 WHERE playlist_id = " . $_REQUEST["id"];
 $results = $mysql -> query($sql);
 if(!$results){
@@ -628,7 +701,7 @@ include "header.php";
             <div class="modal-content">
                 <span class="close" id="queue-close">&times;</span>
                 <div id="playlist-share">
-                    <form>
+                    <form action="playlist.php">
                         <h2>Queue Songs</h2>
                         <script>
                             $(document).ready(function() {
@@ -649,7 +722,8 @@ include "header.php";
                             });
                         </script>
                         <h3>Enter Youtube URLs</h3>
-                        <input type="hidden" name="queueing" value="true">
+                        <input type="hidden" name="controls" value="queue">
+                        <input type="hidden" name="id" value="<?php echo $_REQUEST["id"];?>">
 
                         <div id="inputgroup">
                             <input type="url" name="url[]" placeholder="https://www.youtube.com/watch?v=0tmKy2awfxE"  pattern="https?:\/\/www\.youtube\.com\/watch\?v.*" title="Valid link required" required> <br>
