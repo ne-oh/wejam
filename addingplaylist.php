@@ -52,7 +52,7 @@ if(empty($_REQUEST["creating"])){
 
 
         // 1. Playlist title and theme (if applicable) added to <playlists>
-        $sql = "INSERT INTO playlists (title, theme, creator_id) VALUES ('". $_REQUEST["title"]."', '". $_REQUEST["theme"]."'," . $_SESSION["user_id"]. ")";
+        $sql = "INSERT INTO playlists (title, theme, creator_id, visits) VALUES ('". $_REQUEST["title"]."', '". $_REQUEST["theme"]."'," . $_SESSION["user_id"]. ", 0)";
         $send = $mysql -> query($sql);
         if(!$send){
             echo 'SQL error for $send_playlist: ' . $mysql -> error;

@@ -1,4 +1,4 @@
-var d3 = require("d3"),
+dvar d3 = require("d3"),
     cloud = require("../");
 
 var layout = cloud()
