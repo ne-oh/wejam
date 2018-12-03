@@ -75,4 +75,30 @@ Email <form action="accountupdate.php">
     }
     ?>
 </ol>
+
+    <h2>Songs You've Added</h2>
+    <hr>
+    <ol>
+
+        <?php
+        $sql = "SELECT * FROM songs WHERE user_id = " . $_SESSION["user_id"];
+        //echo $sql;
+        $results = $mysql -> query($sql);
+
+        if(!$results){
+            echo '<li>No songs yet!<a href="addingplaylist.php">Make your first playlist here</a></li>';
+            //echo "<br>" . $sql;
+            //echo 'SQL error: ' . $mysql -> error;
+        }else{
+            while($currentrow = $results -> fetch_assoc()){
+                if(sizeof($currentrow) == 0){
+                    echo '<li>No songs yet!<a href="addingplaylist.php">Make your first playlist here</a></li>';
+                }else{
+                    echo "<li>" . $currentrow['title'] ."</li></a>";
+                }
+
+            }
+        }
+        ?>
+    </ol>
 <?php }?>
