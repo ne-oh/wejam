@@ -38,9 +38,15 @@ body {
 h1 {
     color: var(--darkgrey);
     font-size: 70pt;
-    margin-left: 300px;
+    margin:auto;
 }
 
+
+h15 {
+    color: var(--darkgrey);
+    font-size: 70pt;
+
+}
 
 h2 {
     color: black;
