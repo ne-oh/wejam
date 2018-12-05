@@ -1,3 +1,8 @@
+<style>
+    h1{
+        margin:auto;
+    }
+</style>
 <body>
 <div id="loginblock">
     <h1>Welcome back</h1>

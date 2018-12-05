@@ -29,7 +29,17 @@ if(!$results){
 }
 while($currentrow = $results -> fetch_assoc()){
 ?>
+    <style>
 
+        #newblock{
+            text-align:center;
+        }
+
+        h1{
+            margin-left:-2.5%;
+        }
+
+    </style>
 <h1>Your Profile</h1>
 <h2>Account Settings</h2>
 <hr>
