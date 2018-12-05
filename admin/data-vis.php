@@ -60,3 +60,8 @@ include "admin-header.php";
         console.error(reason);
     });
 </script>
+
+
+<img src="1.png" alt="analytics">
+<img src="2.png" alt="analytics">
+</div>
